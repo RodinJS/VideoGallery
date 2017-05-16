@@ -1,4 +1,6 @@
 # Rodin-Boilerplate
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/RodinJS/VideoGallery.svg?token=87e8aced5c1ce9529a644fda80b7f4decbd320a64456820c875e61d5811bf73e&ts=1494949597322)](https://greenkeeper.io/)
 Rodin JS Boilerplate project for better understanding Library structure (__Rodin Starters Guide__)
 
 ### A basic VR experience in Rodin starts with the following two lines:
