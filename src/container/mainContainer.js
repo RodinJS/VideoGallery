@@ -1,14 +1,16 @@
 import * as RODIN from 'rodin/core';
-import { transition } from '../components/transitionAnimation.js';
+import {transition} from '../components/transitionAnimation.js';
+import { VideoContainer } from './videoContainer.js';
+import { NavigationButtons } from '../components/navigationButtons.js';
 export class MainContainer {
     constructor() {
         this.enviroment = new RODIN.Sphere(90, 720, 4, new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
-            map: RODIN.Loader.loadTexture('./src/assets/skySphere.jpg')
+            map: RODIN.Loader.loadTexture('./src/assets/Intro.jpg')
         }));
         this.enviroment.needsUpdate = true;
         this.transition = transition();
-        this.containers= [];
+        this.containers = [];
     }
 
     get object() {
@@ -17,8 +19,8 @@ export class MainContainer {
 
     run() {
         RODIN.Scene.add(this.enviroment);
-            this.changeEnviroment();
-
+        this.changeEnviroment();
+        //
         // setTimeout(() => {
         //     this.transition.close()
         //
@@ -32,6 +34,10 @@ export class MainContainer {
     }
 
     changeEnviroment() {
-        this.enviroment._threeObject.material.map = RODIN.Loader.loadTexture('./src/assets/living.jpg');
+        // const galleryScene = new RODIN.Scene('galleryScene');
+        // RODIN.Scene.go('galleryScene');
+        this.enviroment._threeObject.material.map = RODIN.Loader.loadTexture('./src/assets/env.jpg');
+        let videoContainer = new VideoContainer();
+        this.containers.push(new NavigationButtons(videoContainer));
     }
 }

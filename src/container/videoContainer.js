@@ -1,27 +1,30 @@
 import * as RODIN from 'rodin/core';
-import {videos} from '../data/videos.js';
-import {MainContainer} from './mainContainer.js';
-import {VideoThumbnail} from '../components/videoThumbnail.js';
-import {linearView, cylindricView, gridView} from '../components/galleryView.js';
+import { videos } from '../data/videos.js';
+import { VideoThumbnail } from '../components/videoThumbnail.js';
+import { linearView, cylindricView, gridView } from '../components/galleryView.js';
+import { VideoPlayer } from './videoPlayerConatainer.js';
 export class VideoContainer {
     constructor() {
-        this.thumbs = videos.map(v => new VideoThumbnail(v));
+        this.videoPlayer = new VideoPlayer();
+        this.thumbs = videos.map(v => new VideoThumbnail(v, this.videoPlayer));
+
         this.init();
     }
 
     init() {
-        this.setView();
+
     }
 
     setView(type = 'linear') {
+        type = type.toLowerCase();
         switch (type) {
             case 'linear':
                 linearView(this.thumbs);
                 break;
-            case 'grid':
+            case 'flat':
                 gridView(this.thumbs);
                 break;
-            case 'cylindric':
+            case 'cylinder':
                 cylindricView(this.thumbs);
                 break;
             default:

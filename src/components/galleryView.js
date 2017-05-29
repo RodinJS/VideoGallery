@@ -1,29 +1,64 @@
 import * as RODIN from 'rodin/core';
-import {NavigationButtons} from './changeViewButtons.js';
 
-export function linearView(thumbs, offset = 0) {
-    let navigate = new NavigationButtons();
-    let linear = new RODIN.Sculpt();
-    RODIN.Scene.add(linear);
-    let segments = 10;
-    for (let i = offset; i < offset + 10 && i < thumbs.length; i++) {
-        if (!thumbs[i].element) {
-            thumbs[i].draw();
-            thumbs[i].element.on(RODIN.CONST.READY, e => {
-                let thumb = e.target;
-                linear.add(thumb);
-                thumb.position.z = -3;
-                thumb.position.x = Math.PI/segments;
-                thumb.position.y = 1.6;
-                thumb.rotation.y = i * Math.PI /segments;
-            })
+let view = null;
+
+export function linearView(thumbs) {
+    view = new RODIN.HorizontalGrid(4,1, 1.1,1.8);
+    view.onShow((elem, index, alpha) => {
+        elem.visible = true;
+    });
+
+    view.onHide((elem, index, alpha) => {
+        elem.parent = null;
+        // boxes[index] = null;
+        elem.visible = false;
+    });
+    view.onMove(()=>{});
+
+    view.setGetElement((index) => {
+        if (index < 0)
+            return;
+
+        if (index >= thumbs.length)
+            return;
+        if (!thumbs[index].element) {
+            thumbs[index].draw(index);
         }
-    }
-    navigate.setActiveButton('linear');
+        return thumbs[index].main;
+    });
+    view.sculpt.position.set(-1,2,-3);
+    RODIN.Scene.add(view.sculpt);
+
 }
 
-export function gridView() {
+export function gridView(thumbs) {
+    view = new RODIN.HorizontalGrid(1,1, 1.1,1.8);
+    view.onShow((elem, index, alpha) => {
+        elem.visible = true;
+    });
+
+    view.onHide((elem, index, alpha) => {
+        elem.parent = null;
+        // boxes[index] = null;
+        elem.visible = false;
+    });
+    view.onMove(()=>{});
+
+    view.setGetElement((index) => {
+        if (index < 0)
+            return;
+
+        if (index >= thumbs.length)
+            return;
+        if (!thumbs[index].element) {
+            thumbs[index].draw(index);
+        }
+        return thumbs[index].main;
+    });
+    view.sculpt.position.set(-1,2,-3);
+    RODIN.Scene.add(view.sculpt);
 }
 
 export function cylindricView() {
+    console.log('cylinder');
 }
