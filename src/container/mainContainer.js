@@ -1,15 +1,20 @@
 import * as RODIN from 'rodin/core';
-import {transition} from '../components/transitionAnimation.js';
+import {blinkAnimation} from '../components/BlinkAnimation.js';
 import { VideoContainer } from './videoContainer.js';
-import { NavigationButtons } from '../components/navigationButtons.js';
+import { Navigation} from '../components/Navigation.js';
 export class MainContainer {
     constructor() {
         this.enviroment = new RODIN.Sphere(90, 720, 4, new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
-            map: RODIN.Loader.loadTexture('./src/assets/Intro.jpg')
+            map: RODIN.Loader.loadTexture('./src/assets/space.jpg')
         }));
+        this.loader = new RODIN.Plane(8, 4.5, new THREE.MeshBasicMaterial({transparent: true, map: RODIN.Loader.loadTexture('./src/assets/Rodin_video_gallery.png')}));
+        this.loader.on(RODIN.CONST.READY, env => {
+            this.enviroment.add(env.target);
+            env.target.position.z = - 10
+        });
         this.enviroment.needsUpdate = true;
-        this.transition = transition();
+        this.transition = blinkAnimation();
         this.containers = [];
     }
 
@@ -19,25 +24,24 @@ export class MainContainer {
 
     run() {
         RODIN.Scene.add(this.enviroment);
-        this.changeEnviroment();
+        // this.changeEnviroment();
         //
-        // setTimeout(() => {
-        //     this.transition.close()
-        //
-        // }, 8000)
-        // setTimeout(() => {
-        //     this.changeEnviroment();
-        //     this.transition.open();
-        //
-        // }, 12000)
+        setTimeout(() => {
+            this.transition.close()
+
+        }, 8000)
+        setTimeout(() => {
+            this.changeEnviroment();
+            this.transition.open();
+
+        }, 12000)
 
     }
 
     changeEnviroment() {
-        // const galleryScene = new RODIN.Scene('galleryScene');
-        // RODIN.Scene.go('galleryScene');
+        this.loader._threeObject.visible = false;
         this.enviroment._threeObject.material.map = RODIN.Loader.loadTexture('./src/assets/env.jpg');
         let videoContainer = new VideoContainer();
-        this.containers.push(new NavigationButtons(videoContainer));
+        this.containers.push(new Navigation(videoContainer));
     }
 }

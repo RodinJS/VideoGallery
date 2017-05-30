@@ -26,8 +26,8 @@ export class Button {
                 radius: 0.1
             }
         });
+
         this.button.on(RODIN.CONST.READY, btn => {
-            // this.element._threeObject.material.visible = true;
             this.element.position.z = 0.01;
             this.element.add(this.glow);
             this.glow.position.z = 0.02;
@@ -36,19 +36,9 @@ export class Button {
             btn.target.scale.set(.8,.8,.8);
             btn.target.position.z = 0.03;
         });
-        this.button.on(RODIN.CONST.GAMEPAD_HOVER, this.onHover.bind(this));
-        this.element.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.onClickElement.bind(this))
     }
+
     get active() {
         return this.element;
-    }
-
-    onHover(event) {
-
-    }
-
-    onClickElement(event) {
-
-        event.target._threeObject.material.visible = false;
     }
 }
