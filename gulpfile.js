@@ -29,9 +29,9 @@ const GZIP_OPTIONS = {
 gulp.task('js', () => {
 	const s = size({title: 'JS -> ', pretty: true});
 	return gulp.src(JS)
-		.pipe(plumber(ERROR_MESSAGE))
+		// .pipe(plumber(ERROR_MESSAGE))
 		.pipe(babel())
-		.pipe(uglify(UGLIFY_OPTIONS)) //comment this for better debugging [+]
+		// .pipe(uglify(UGLIFY_OPTIONS)) //comment this for better debugging [+]
 		.pipe(s)
 		.pipe(plumber.stop())
 		.pipe(gulp.dest('./build'))
