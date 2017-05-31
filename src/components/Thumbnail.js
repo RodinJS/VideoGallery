@@ -84,7 +84,7 @@ export class Thumbnail extends RODIN.Sculpt {
     }
 
     onButtonUp(e) {
-        if (RODIN.Time.now - this._lastButtonDown > 200)
+        if (RODIN.Time.now - this._lastButtonDown > 400)
             return;
 
         if (!this.active) {
@@ -94,17 +94,26 @@ export class Thumbnail extends RODIN.Sculpt {
             Thumbnail.thumbAnimation(e.target, {position: {z: .5}}, 'elementShow', 100);
 
         } else if (!this.description._threeObject.visible && e.target.position.z > 0) {
+            this.transition.camera = RODIN.Scene.HMDCamera;
             this.transition.close();
-            setTimeout(() => {
-                this.transition.open();
+
+            const onclose = (evt) => {
+                this.transition.removeEventListener('Closed', onclose);
+
                 RODIN.Scene.go('videoPlayerScene');
                 RODIN.Scene.HMDCamera.name = 'videoCamera';
-                this.transition.setCamera(RODIN.Scene.HMDCamera);
-                setTimeout(()=>{
-                    this.transition.close();
-                });
-                this.videoPlayer.playVideo(this.params.url, this.params.title, './src/assets/icons/rodin.jpg');
-            }, 1000)
+                this.videoPlayer.playVideo(this.params.url, this.params.title, './src/assets/icons/rodin.jpg', this.transition);
+                this.transition.camera = RODIN.Scene.HMDCamera;
+
+                // we need this timeout because of a bug in lib
+                // remove this when lib is fixed
+                setTimeout(() => {
+                    this.transition.open();
+                }, 0);
+            };
+
+            this.transition.on('Closed', onclose);
+
         }
     }
 

@@ -14,7 +14,7 @@ export class MainContainer {
             env.target.position.z = - 10
         });
         this.enviroment.needsUpdate = true;
-        this.transition = blinkAnimation();
+        this.transition = blinkAnimation.get();
         this.containers = [];
     }
 
@@ -26,16 +26,19 @@ export class MainContainer {
         RODIN.Scene.add(this.enviroment);
         // this.changeEnviroment();
         RODIN.Scene.HMDCamera.name = 'mainCamera';
-        this.transition.setCamera(RODIN.Scene.HMDCamera);
+        this.transition.camera = RODIN.Scene.HMDCamera;
+
         setTimeout(() => {
             this.transition.close()
+        }, 5000);
 
-        }, 1000);
-        setTimeout(() => {
+        const onclose = (evt)=>{
+            this.transition.removeEventListener('Closed', onclose);
             this.changeEnviroment();
             this.transition.open();
-        }, 2500);
+        };
 
+        this.transition.on('Closed', onclose);
     }
 
     changeEnviroment() {

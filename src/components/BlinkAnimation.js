@@ -1,58 +1,75 @@
 import * as RODIN from 'rodin/core';
 
 
-export function blinkAnimation() {
-    let transSculpt = new RODIN.Sculpt();
-    let upTransition = new RODIN.Plane(0.05, 0.05, new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        color: 0xFFFFFF
-        // map: RODIN.Loader.loadTexture('./src/assets/desert.jpg')
-    }));
-    upTransition.position.z = -0.02;
-    upTransition.position.y = 0.025;
-    let downTransition = new RODIN.Plane(0.05, 0.05, new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        color: 0xFFFFFF
-        // map: RODIN.Loader.loadTexture('./src/assets/desert.jpg')
-    }));
-    transSculpt._threeObject.renderOrder = 10000;
-    downTransition.position.z = -0.02;
-    downTransition.position.y = -0.025;
-    transSculpt.add(upTransition);
-    transSculpt.add(downTransition);
+export class blinkAnimation extends RODIN.EventEmitter {
+    constructor() {
+        super();
+        blinkAnimation.instance = this;
 
-    let setCamera = (camera) => {
-        camera.add(transSculpt);
-    };
+        this.eyelidContainer = new RODIN.Sculpt();
+        this.topEyelid = new RODIN.Plane(1, 0.05, new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            color: 0x000000
+        }));
+        this.topEyelid.position.z = -0.02;
+        this.topEyelid.position.y = 0.04;
+        this.bottomEyelid = new RODIN.Plane(1, 0.05, new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            color: 0x000000
+        }));
+        this.eyelidContainer._threeObject.renderOrder = 10000;
+        this.bottomEyelid.position.z = -0.02;
+        this.bottomEyelid.position.y = -0.04;
+        this.eyelidContainer.add(this.topEyelid);
+        this.eyelidContainer.add(this.bottomEyelid);
 
-    let blink = (pos, type) => {
+        this.topEyelid.on(RODIN.CONST.ANIMATION_COMPLETE, (evt) => {
+            if (evt.animation === 'close') {
+                this.emit('Closed', new RODIN.RodinEvent());
+            } else {
+                this.emit('Opened', new RODIN.RodinEvent());
+            }
+        });
+
+        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.04, 'open', 1000));
+        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.04, 'open', 1000));
+
+        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.025, 'close', 1000));
+        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.025, 'close', 1000));
+
+    }
+
+    set camera(camera) {
+        camera.add(this.eyelidContainer);
+    }
+
+    static _makeAnimation(pos, type, duration) {
         let animate = new RODIN.AnimationClip(type, {
             position: {
                 y: pos,
             },
         });
-        animate.duration(5000);
+        animate.duration(duration);
         return animate;
-    };
-    let close = () => {
-        upTransition.animation.add(blink(-0.0125, 'close'));
+    }
 
-        downTransition.animation.add(blink(0.0125, 'close'));
+    close() {
+        this.topEyelid.animation.start('close');
+        this.bottomEyelid.animation.start('close');
 
-        upTransition.animation.start('close');
-        upTransition.on(RODIN.CONST.ANIMATION_COMPLETE, (e) => {
-            if (e.animation === 'close') {
-            }
-        });
+    }
 
-        downTransition.animation.start('close');
+    open() {
+        this.topEyelid.animation.start('open');
+        this.bottomEyelid.animation.start('open');
+    }
 
-    };
-    let open = () => {
-        upTransition.animation.add(blink(0.0125, 'open'));
-        upTransition.animation.start('open');
-        downTransition.animation.add(blink(-0.0125, 'open'));
-        downTransition.animation.start('open');
-    };
-    return { setCamera, close, open}
+    static instance = null;
+
+    static get() {
+        if (!blinkAnimation.instance) {
+            new blinkAnimation();
+        }
+        return blinkAnimation.instance;
+    }
 }

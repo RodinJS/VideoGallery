@@ -25,7 +25,7 @@ export class Navigation {
             this.viewChange.name = 'textChange';
             this.viewChange._threeObject.material.visible = false;
             e.target.add(this.viewChange);
-            this.viewChange.position.y = 0.11;
+            this.viewChange.position.y = 0.12;
             e.target._threeObject.renderOrder = 0;
             e.target.position.z = -2;
             e.target.position.y = 1.3;
