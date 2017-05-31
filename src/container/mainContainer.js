@@ -25,23 +25,23 @@ export class MainContainer {
     run() {
         RODIN.Scene.add(this.enviroment);
         // this.changeEnviroment();
-        //
+        RODIN.Scene.HMDCamera.name = 'mainCamera';
+        this.transition.setCamera(RODIN.Scene.HMDCamera);
         setTimeout(() => {
             this.transition.close()
 
-        }, 8000)
+        }, 1000);
         setTimeout(() => {
             this.changeEnviroment();
             this.transition.open();
-
-        }, 12000)
+        }, 2500);
 
     }
 
     changeEnviroment() {
-        this.loader._threeObject.visible = false;
+        this.loader._threeObject.material.visible = false;
         this.enviroment._threeObject.material.map = RODIN.Loader.loadTexture('./src/assets/env.jpg');
-        let videoContainer = new VideoContainer();
+        let videoContainer = new VideoContainer(this.transition);
         this.containers.push(new Navigation(videoContainer));
     }
 }

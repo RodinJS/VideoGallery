@@ -18,14 +18,15 @@ export class Navigation {
                 radius: 0.2
             }
         });
+        this.isNavigationOpen = false;
         this.btnArea.on(RODIN.CONST.READY, e => {
             RODIN.Scene.add(e.target);
             this.viewChange = new RODIN.Text({ text: 'CHANGE VIEW', fontSize: 0.04, color: 0xFFFFFF });
             this.viewChange.name = 'textChange';
             this.viewChange._threeObject.material.visible = false;
             e.target.add(this.viewChange);
-            this.viewChange.position.y = 0.13;
-
+            this.viewChange.position.y = 0.11;
+            e.target._threeObject.renderOrder = 0;
             e.target.position.z = -2;
             e.target.position.y = 1.3;
 
@@ -45,12 +46,11 @@ export class Navigation {
                         t.target.position.y = -0.13;
                         t.target._threeObject.material.visible = false;
                     });
-                    btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (a) => {
-                        this.openNavigation(a.target);
+                    btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (e) => {
+                        this.openNavigation(e);
                     });
                     this.setActiveButton('Linear');
                 });
-                button.active.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.change);
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER, this.onHoverAnimation.bind(this));
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.onHoverOutAnimation.bind(this));
             }
@@ -69,7 +69,7 @@ export class Navigation {
         this.hideViewChange();
         this.hideOrShowChangeView();
         this.buttons.map(btn => {
-            this.animation(btn.element, {
+            Navigation.animation(btn.element, {
                 position: {
                     x: 0
                 }
@@ -81,13 +81,16 @@ export class Navigation {
                 }
             })
         });
+        this.isNavigationOpen = false;
         this.videoContainer.setView(type)
     }
 
     onHoverAnimation(evt) {
         let { target } = evt;
-        this.animation(target._children[1], { scale: { x: .95, y: .95, z: .95 } }, 'scaleIn', 300);
-        this.viewChange._threeObject.material.visible = true;
+        Navigation.animation(target._children[1], { scale: { x: .95, y: .95, z: .95 } }, 'scaleIn', 300);
+        if(!this.isNavigationOpen) {
+            this.showViewChange();
+        }
         target._children.map((ch) => {
             if (ch.name === 'hoverText') {
                 ch._threeObject.material.visible = true;
@@ -97,8 +100,10 @@ export class Navigation {
 
     onHoverOutAnimation(evt) {
         let { target } = evt;
-        this.animation(target._children[1], { scale: { x: .8, y: .8, z: .8 } }, 'scaleOut', 300);
-        // this.viewChange._threeObject.visible = false;
+        Navigation.animation(target._children[1], { scale: { x: .8, y: .8, z: .8 } }, 'scaleOut', 300);
+        if(!this.isNavigationOpen) {
+            this.hideViewChange();
+        }
         target._children.map((ch) => {
             if (ch.name === 'hoverText') {
                 ch._threeObject.material.visible = false;
@@ -107,14 +112,15 @@ export class Navigation {
     }
 
     openNavigation(evt) {
+        evt.stopPropagation();
         if (this.sculpt._threeObject.material.visible) {
-            return this.setActiveButton(evt.name)
+            return this.setActiveButton(evt.target.name)
         }
         this.showNavigation();
         this.showViewChange();
         this.buttons.map((value, key) => {
             value.element._threeObject.visible = true;
-            this.animation(value.element, {
+            Navigation.animation(value.element, {
                 position: {
                     x: -0.20 + 0.20 * key
                 }
@@ -123,15 +129,19 @@ export class Navigation {
     }
 
     showNavigation() {
+        this.isNavigationOpen = true;
         this.sculpt._threeObject.material.visible = true;
     }
+
     hideViewChange() {
         this.viewChange._threeObject.material.visible = false;
     }
+
     showViewChange() {
         this.viewChange._threeObject.material.visible = true;
     }
-    animation(obj, params, name, duration) {
+
+    static animation(obj, params, name, duration) {
         const navigationAnimation = new RODIN.AnimationClip(name, params);
         navigationAnimation.duration(duration);
         obj.animation.add(navigationAnimation);

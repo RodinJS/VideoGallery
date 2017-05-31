@@ -1,24 +1,25 @@
 import * as RODIN from 'rodin/core';
-import { VideoPlayer } from '../container/videoPlayerConatainer.js';
-import { blinkAnimation } from './BlinkAnimation.js';
 
-export class Thumbnail {
-    constructor(params, videoPlayer) {
+export class Thumbnail extends RODIN.Sculpt {
+    constructor(params, videoPlayer, blinkAnimation) {
+        super();
+
         this.videoPlayer = videoPlayer;
-        this.transition = blinkAnimation();
+        this.transition = blinkAnimation;
         this.element = null;
         this.main = null;
         this.params = params;
         this.more = new RODIN.Text({
             text: 'More About Video',
             fontSize: 0.065,
-            color: 0xffffff,
-            background: {
-                image: { url: './src/assets/more_bg.png' }
-            }
+            color: 0xffffff
         });
+        this.isDescriptionMode = false;
         this.more.name = 'more';
-        this.more._threeObject.material.visible = false;
+        this.more.visible = false;
+
+        this.active = false;
+
         this.more.on(RODIN.CONST.READY, evt => {
             let more = evt.target;
             more.width = 1.6;
@@ -33,21 +34,20 @@ export class Thumbnail {
     }
 
     moreHover(evt) {
-        this.thumbAnimation(evt.target, { position: { z: 0.2 } }, 'moreHover', 50);
+        Thumbnail.thumbAnimation(evt.target, {position: {z: 0.2}}, 'moreHover', 50);
     }
 
     moreHoverOut(evt) {
-        this.thumbAnimation(evt.target, { position: { z: 0.1 } }, 'moreHoverOut', 50);
+        Thumbnail.thumbAnimation(evt.target, {position: {z: 0.1}}, 'moreHoverOut', 50);
     }
 
     draw(id) {
-        this.main = new RODIN.Sculpt();
         this.element = new RODIN.Element({
             name: this.params.name,
             width: 1.6,
             height: 0.9,
             background: {
-                image: { url: this.params.thumbnail }
+                image: {url: this.params.thumbnail}
             },
             border: {
                 radius: 0.05
@@ -55,12 +55,16 @@ export class Thumbnail {
             transparent: false
         });
         this.element.id = id;
+        this.id = id;
+
         this.element.on(RODIN.CONST.READY, el => {
-            this.main.add(el.target);
-            this.main.add(this.addDescription(id));
-            let title = new RODIN.Text({ text: this.params.title, fontSize: 0.12, color: 0xffffff });
+            this.add(this.element);
+            this.element.container = this;
+
+            this.element.add(this.getDescription(id));
+            let title = new RODIN.Text({text: this.params.title, fontSize: 0.12, color: 0xffffff});
             title.on(RODIN.CONST.READY, text => {
-                let { target } = text;
+                let {target} = text;
                 target.position.y = 0.3;
                 target.position.x = -0.55;
                 target.position.z = 0.01;
@@ -68,29 +72,43 @@ export class Thumbnail {
                 el.target.add(this.more);
             });
         });
-        this.element.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.onClick.bind(this));
-        this.element.on(RODIN.CONST.GAMEPAD_HOVER, this.onHover.bind(this));
-        this.element.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.onHoverOut.bind(this));
-        return this.main;
+        this._lastButtonDown = 0;
+
+        this.element.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.onButtonDown.bind(this));
+        this.element.on(RODIN.CONST.GAMEPAD_BUTTON_UP, this.onButtonUp.bind(this));
+        return this;
     }
 
+    onButtonDown(e) {
+        this._lastButtonDown = RODIN.Time.now;
+    }
 
-    onClick(e) {
-        this.more._threeObject.material.visible = true;
-        this.thumbAnimation(e.target, { position: { z: .5 } }, 'element', 100);
-        if (e.target.position.z === 0) {
-            this.main._parent._children.map(elem => {
-                this.reset(elem, e.target.id);
-            });
+    onButtonUp(e) {
+        if (RODIN.Time.now - this._lastButtonDown > 200)
+            return;
+
+        if (!this.active) {
+            Thumbnail.reset(e.target.container.parent);
+            this.active = true;
+            this.more.visible = true;
+            Thumbnail.thumbAnimation(e.target, {position: {z: .5}}, 'elementShow', 100);
+
         } else if (!this.description._threeObject.visible && e.target.position.z > 0) {
-            console.log(this.videoPlayer)
-            this.videoPlayer.playVideo(this.params.url, this.params.title, './src/assets/icons/rodin.jpg');
-            RODIN.Scene.go('videoPlayerScene')
+            this.transition.close();
+            setTimeout(() => {
+                this.transition.open();
+                RODIN.Scene.go('videoPlayerScene');
+                RODIN.Scene.HMDCamera.name = 'videoCamera';
+                this.transition.setCamera(RODIN.Scene.HMDCamera);
+                setTimeout(()=>{
+                    this.transition.close();
+                });
+                this.videoPlayer.playVideo(this.params.url, this.params.title, './src/assets/icons/rodin.jpg');
+            }, 1000)
         }
-
     }
 
-    addDescription(id) {
+    getDescription(id) {
         this.description = new RODIN.Element({
             name: 'description',
             width: 1.6,
@@ -103,9 +121,9 @@ export class Thumbnail {
                 radius: 0.05
             }
         });
-        this.description._threeObject.visible = false;
+
+        this.description.visible = false;
         this.description.id = id;
-        this.description.scale.set(0, 0, 0);
         let description = new RODIN.DynamicText({
             width: 1.6,
             height: .9,
@@ -118,45 +136,43 @@ export class Thumbnail {
         description.position.z = .01;
         this.description.on(RODIN.CONST.READY, evt => {
             evt.target.add(description);
-            evt.target.position.z = 0.52;
+            //evt.target.position.z = 0.52;
         });
         this.description.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
         return this.description;
     }
 
-    onHover(e) {
-        // this.more._threeObject.material.visible = true;
-    }
-
-    onHoverOut(e) {
-        // this.more._threeObject.material.visible = false;
-    }
-
-    showHideDescription() {
-        this.element._children.map(i => {
-            i._threeObject.visible = !i._threeObject.visible;
-        });
-        this.description._threeObject.visible = !this.description._threeObject.visible;
-        if (this.description._threeObject.visible) {
-            this.description.scale.set(1, 1, 1);
+    showHideDescription(evt) {
+        evt && evt.stopPropagation();
+        for (let i = 0; i < this.element._children.length; i++) {
+            const el = this.element._children[i];
+            el.visible = !el.visible;
         }
+        this.isDescriptionMode = !this.isDescriptionMode;
     }
 
-    thumbAnimation(obj, params, name, duration) {
+    static thumbAnimation(obj, params, name, duration) {
         const navigationAnimation = new RODIN.AnimationClip(name, params);
         navigationAnimation.duration(duration);
         obj.animation.add(navigationAnimation);
         obj.animation.start(name);
     }
 
-    reset(el, id) {
-        el._children.map(ch => {
-            if (ch.name === 'element' && ch.id !== id) {
-                this.thumbAnimation(ch, { position: { z: 0 } }, 'elementHide', 100);
+    static reset(thumbnailContainer) {
+        for (let i = 0; i < thumbnailContainer._children.length; i++) {
+            const ch = thumbnailContainer._children[i];
+            if (!ch.active) {
+                continue;
             }
-            if (ch.name === 'description' && ch.id !== id) {
-                ch._threeObject.visible = false;
+            ch.active = false;
+
+            Thumbnail.thumbAnimation(ch.element, {position: {z: 0}}, 'elementHide', 100);
+            ch.more.visible = false;
+            if (ch.isDescriptionMode) {
+                console.log('here');
+                ch.showHideDescription();
             }
-        });
+        }
+
     }
 }
