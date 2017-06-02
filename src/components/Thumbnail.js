@@ -12,27 +12,36 @@ export class Thumbnail extends RODIN.Sculpt {
         this.element = null;
         this.main = null;
         this.params = params;
-        this.more = new RODIN.Text({
-            text: 'More About Video',
-            fontSize: 0.065,
-            color: 0xffffff
+        this.more = new RODIN.Element({
+            width: 1.6,
+            height: 0.15,
+            background: {
+                image: {url: './src/assets/more_bg.png'}
+            },
+            border: {
+                radius: {leftBottom: 0.05, rightBottom: 0.05}
+            },
+            transparent: true
         });
         this.isDescriptionMode = false;
         this.more.name = 'more';
         this.more.visible = false;
 
         this.active = false;
-
+        let moretext = new RODIN.Text({
+            text: 'More About Video',
+            fontSize: 0.065,
+            color: 0xffffff
+        });
         this.more.on(RODIN.CONST.READY, evt => {
             let more = evt.target;
-            more.width = 1.6;
-            more.height = 0.3;
+            more.visible = false;
+            more.add(moretext);
+            moretext.position.z = 0.01;
             more._threeObject.geometry.center();
             more.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
-            more.on(RODIN.CONST.GAMEPAD_HOVER, this.moreHover.bind(this));
-            more.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.moreHoverOut.bind(this));
-            more.position.y = -0.35;
-            more.position.z = 0.1;
+            more.position.y = -0.38;
+            more.position.z = 0.01;
         })
     }
 
@@ -79,15 +88,33 @@ export class Thumbnail extends RODIN.Sculpt {
             this.element.container = this;
 
             this.element.add(this.getDescription(id));
-            let title = new RODIN.Text({text: this.params.title, fontSize: 0.12, color: 0xffffff});
+            let title = new RODIN.Element({
+                width: 1.6,
+                height: 0.3,
+                background: {
+                    image: {url: './src/assets/title.png'}
+                },
+                border: {
+                    radius: {leftTop: 0.05, rightTop: 0.05}
+                },
+                label:{text: this.params.title, fontSize: 0.12, color: 0xffffff, position:{v:50, h:0}}
+            });
             title.on(RODIN.CONST.READY, text => {
                 let {target} = text;
+                // title._threeObject.renderOrder = 12;
                 target.position.y = 0.3;
-                target.position.x = -0.55;
                 target.position.z = 0.01;
                 el.target.add(target);
                 el.target.add(this.more);
             });
+            // let titleText = new RODIN.Text({text: this.params.title, fontSize: 0.12, color: 0xffffff});
+            // titleText.on(RODIN.CONST.READY, (e) => {
+            //     el.target.add(titleText);
+            //      titleText._threeObject.renderOrder = 113;
+            //     titleText.position.x = -.55;
+            //     titleText.position.z = .02;
+            //     titleText.position.y = 0.3;
+            // });
         });
         this._lastButtonDown = 0;
 
@@ -101,6 +128,7 @@ export class Thumbnail extends RODIN.Sculpt {
      * @param e
      */
     onButtonDown(e) {
+        e.stopPropagation();
         this._lastButtonDown = RODIN.Time.now;
     }
 
@@ -172,11 +200,20 @@ export class Thumbnail extends RODIN.Sculpt {
             color: 0xffffff
         });
         description._threeObject.renderOrder = 1;
-        description.position.y = 0.3;
+        description.position.y = .32;
         description.position.z = .01;
+        description.position.x = .05;
+        let close = new RODIN.Text({
+            text: 'Click To Close',
+            fontSize: 0.06,
+            color: 0xffffff
+        });
+        close._threeObject.renderOrder = 1;
         this.description.on(RODIN.CONST.READY, evt => {
             evt.target.add(description);
-            //evt.target.position.z = 0.52;
+            evt.target.add(close);
+            close.position.y = -.35;
+            close.position.z = .01;
         });
         this.description.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
         return this.description;
@@ -224,7 +261,6 @@ export class Thumbnail extends RODIN.Sculpt {
             Thumbnail.thumbAnimation(ch.element, {position: {z: 0}}, 'elementHide', 100);
             ch.more.visible = false;
             if (ch.isDescriptionMode) {
-                console.log('here');
                 ch.showHideDescription();
             }
         }

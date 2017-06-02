@@ -28,7 +28,7 @@ export class VideoPlayer {
      * @param transition
      */
     playVideo(url, title, backgroundImage, transition) {
-        if (this.controls) {
+        if (this.controls && this.controls.parent) {
             this.controls.destroy();
             this.controls.parent.remove(this.controls)
         }

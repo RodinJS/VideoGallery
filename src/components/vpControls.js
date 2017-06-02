@@ -85,6 +85,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.timeBarButton = null;
         this.coverEl = null;
         this.title = title;
+        this.isVideoReady = false;
 
         this.panelCenter = new RODIN.Sculpt();
 
@@ -242,29 +243,32 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             evt.target.animation.start("hoverOutAnimation");
         });
         back.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
-            this.pauseButton.scale.set(1, 1, 1);
-            this.playButton.scale.set(1, 1, 1);
-            this.pauseButton.parent = null;
-            this.playButton.parent = this.panel;
-            this.player.pause();
-            this.player.jumpTo(0);
-            this.transition.close();
+            console.log(this.isVideoReady)
+            if (this.isVideoReady) {
+                this.pauseButton.scale.set(1, 1, 1);
+                this.playButton.scale.set(1, 1, 1);
+                this.pauseButton.parent = null;
+                this.playButton.parent = this.panel;
+                this.player.pause();
+                this.player.jumpTo(0);
+                this.transition.close();
 
-            const onclose = (evt) => {
-                this.transition.removeEventListener('Closed', onclose);
+                const onclose = (evt) => {
+                    this.transition.removeEventListener('Closed', onclose);
 
-                RODIN.Scene.go('Main');
-                RODIN.Scene.HMDCamera.name = 'mainCamera';
-                this.transition.camera = RODIN.Scene.HMDCamera;
+                    RODIN.Scene.go('Main');
+                    RODIN.Scene.HMDCamera.name = 'mainCamera';
+                    this.transition.camera = RODIN.Scene.HMDCamera;
 
-                // we need this timeout because of a bug in lib
-                // remove this when lib is fixed
-                setTimeout(() => {
-                    this.transition.open();
-                }, 0);
-            };
+                    // we need this timeout because of a bug in lib
+                    // remove this when lib is fixed
+                    setTimeout(() => {
+                        this.transition.open();
+                    }, 0);
+                };
 
-            this.transition.on('Closed', onclose);
+                this.transition.on('Closed', onclose);
+            }
         });
     }
 
@@ -526,6 +530,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
 
 
         timeLineBG.on(RODIN.CONST.READY, (evt) => {
+            this.isVideoReady = true;
             timeLineBG.parent = this.panel;
             timeLineBG.position.set(0, -this.width / 3.75, 0);
             this.elementsPending--;
