@@ -50,15 +50,16 @@ export const setView = (thumbs, viewNumber) => {
 
     let isScrolling = false;
     view.on(RODIN.CONST.SCROLL_START, (evt) => {
-        evt.stopPropagation();
-        if (isScrolling)
+        // evt.stopPropagation();
+        if (isScrolling) {
             return;
+        }
         isScrolling = true;
         Thumbnail.reset(view.sculpt);
     });
 
     view.on(RODIN.CONST.SCROLL_END, (evt) => {
-        // evt.stopPropagation();
+        evt.stopPropagation();
         isScrolling = false;
     });
 

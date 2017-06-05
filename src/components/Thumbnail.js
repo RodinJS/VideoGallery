@@ -11,6 +11,7 @@ export class Thumbnail extends RODIN.Sculpt {
         this.transition = blinkAnimation;
         this.element = null;
         this.main = null;
+        this.stayInMode = false;
         this.params = params;
         this.more = new RODIN.Element({
             width: 1.6,
@@ -97,7 +98,7 @@ export class Thumbnail extends RODIN.Sculpt {
                 border: {
                     radius: {leftTop: 0.05, rightTop: 0.05}
                 },
-                label:{text: this.params.title, fontSize: 0.12, color: 0xffffff, position:{v:50, h:0}}
+                label: {text: this.params.title, fontSize: 0.12, color: 0xffffff, position: {v: 50, h: 0}}
             });
             title.on(RODIN.CONST.READY, text => {
                 let {target} = text;
@@ -107,14 +108,6 @@ export class Thumbnail extends RODIN.Sculpt {
                 el.target.add(target);
                 el.target.add(this.more);
             });
-            // let titleText = new RODIN.Text({text: this.params.title, fontSize: 0.12, color: 0xffffff});
-            // titleText.on(RODIN.CONST.READY, (e) => {
-            //     el.target.add(titleText);
-            //      titleText._threeObject.renderOrder = 113;
-            //     titleText.position.x = -.55;
-            //     titleText.position.z = .02;
-            //     titleText.position.y = 0.3;
-            // });
         });
         this._lastButtonDown = 0;
 
@@ -214,6 +207,7 @@ export class Thumbnail extends RODIN.Sculpt {
             evt.target.add(close);
             close.position.y = -.35;
             close.position.z = .01;
+            close.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
         });
         this.description.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
         return this.description;
@@ -229,6 +223,7 @@ export class Thumbnail extends RODIN.Sculpt {
             const el = this.element._children[i];
             el.visible = !el.visible;
         }
+        this.stayInMode = false;
         this.isDescriptionMode = !this.isDescriptionMode;
     }
 
@@ -253,13 +248,16 @@ export class Thumbnail extends RODIN.Sculpt {
     static reset(thumbnailContainer) {
         for (let i = 0; i < thumbnailContainer._children.length; i++) {
             const ch = thumbnailContainer._children[i];
+            ch.more.visible = false;
+            if (ch.isDescriptionMode && !ch.stayInMode) {
+                ch.stayInMode = true;
+                return
+            }
             if (!ch.active) {
                 continue;
             }
             ch.active = false;
-
             Thumbnail.thumbAnimation(ch.element, {position: {z: 0}}, 'elementHide', 100);
-            ch.more.visible = false;
             if (ch.isDescriptionMode) {
                 ch.showHideDescription();
             }

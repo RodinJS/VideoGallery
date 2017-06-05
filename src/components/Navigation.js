@@ -48,16 +48,16 @@ export class Navigation {
                     type.on(RODIN.CONST.READY, (t) => {
                         button.active.add(type);
                         t.target.position.y = -0.13;
-                        t.target._threeObject.material.visible = true;
+                        t.target._threeObject.material.visible = false;
                     });
                     btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (e) => {
                         this.openNavigation(e);
                     });
-                    this.setActiveButton('Linear');
                 });
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER, this.onHoverAnimation.bind(this));
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.onHoverOutAnimation.bind(this));
             }
+            this.setActiveButton('Linear');
         });
     }
 
@@ -96,8 +96,7 @@ export class Navigation {
             this.showViewChange();
         }
         target._children.map((ch) => {
-            if (ch.name === 'hoverText' && ch.isActive) {
-                ch.isActive = false;
+            if (ch.name === 'hoverText') {
                 ch._threeObject.material.visible = true;
             }
         })
