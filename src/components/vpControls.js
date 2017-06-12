@@ -72,7 +72,13 @@ const secondsToH_MM_SS = (length, separator = ":") => {
 
 export class VPcontrolPanel extends RODIN.Sculpt {
 
-    constructor({player, title = "Untitled Video", cover = null, distance = 1.5, width = 1.5}, transition) {
+    constructor({
+        player,
+        title = "Untitled Video",
+        cover = null,
+        distance = 1.5,
+        width = 1.5
+    }, transition) {
 
         super(new THREE.Object3D());
         this.transition = transition;
@@ -140,6 +146,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.createTitle();
         this.createCover();
         this.createTimeBar();
+        this.createHDToggle();
     }
 
     init() {
@@ -236,7 +243,12 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     }
 
     createBackButton() {
-        let backParams = {name: "back", width: this.width / 8, height: this.width / 8, ppm: 500};
+        let backParams = {
+            name: "back",
+            width: this.width / 8,
+            height: this.width / 8,
+            ppm: 500
+        };
 
         backParams.background = {
             image: {
@@ -321,7 +333,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     }
 
     createPlayPauseButtons() {
-        let playParams = {name: "play", width: this.width / 5, height: this.width / 5};
+        let playParams = {
+            name: "play",
+            width: this.width / 5,
+            height: this.width / 5
+        };
 
         playParams.background = {
             color: 0x666666,
@@ -336,7 +352,10 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             url: "./src/assets/icons/play.png",
             width: this.width / 15,
             height: this.width / 15,
-            position: {h: 54, v: 50}
+            position: {
+                h: 54,
+                v: 50
+            }
         };
 
         let playButton = new RODIN.Element(playParams);
@@ -382,7 +401,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         });
 
 
-        let pauseParams = {name: "pause", width: this.width / 5, height: this.width / 5};
+        let pauseParams = {
+            name: "pause",
+            width: this.width / 5,
+            height: this.width / 5
+        };
 
         pauseParams.background = {
             color: 0x666666,
@@ -397,7 +420,10 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             url: "./src/assets/icons/pause.png",
             width: this.width * 0.04,
             height: this.width * 0.06,
-            position: {h: 50, v: 50}
+            position: {
+                h: 50,
+                v: 50
+            }
         };
 
         let pauseButton = new RODIN.Element(pauseParams);
@@ -445,7 +471,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     }
 
     createBufferingLogo(distance) {
-        const bufferingParams = {name: "buffering", width: this.width / 6, height: this.width / 6};
+        const bufferingParams = {
+            name: "buffering",
+            width: this.width / 6,
+            height: this.width / 6
+        };
 
         bufferingParams.background = {
             color: 0x666666,
@@ -462,7 +492,10 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             url: "./src/assets/icons/rodin.png",
             width: this.width / 30,
             height: this.width / 25,
-            position: {h: 54, v: 35}
+            position: {
+                h: 54,
+                v: 35
+            }
         };
         bufferingParams.label = {
             text: "loading",
@@ -723,13 +756,21 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     }
 
     createAudioToggle() {
-        let muteParams = {name: "mute", width: this.width * 0.04, height: this.width * 0.04, ppm: 1000};
+        let muteParams = {
+            name: "mute",
+            width: this.width * 0.04,
+            height: this.width * 0.04,
+            ppm: 1000
+        };
 
         muteParams.image = {
             url: "./src/assets/icons/audioON.png",
             width: this.width * 0.04,
             height: this.width * 0.04,
-            position: {h: 50, v: 50}
+            position: {
+                h: 50,
+                v: 50
+            }
         };
 
         let muteButton = new RODIN.Element(muteParams);
@@ -767,14 +808,22 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             unmuteButton.position.set(-this.width / 2, -this.width / 3.02, 0);
         });
 
-        let unmuteParams = {name: "unmute", width: this.width * 0.04, height: this.width * 0.04, ppm: 1000};
+        let unmuteParams = {
+            name: "unmute",
+            width: this.width * 0.04,
+            height: this.width * 0.04,
+            ppm: 1000
+        };
 
         unmuteParams.image = {
             url: "./src/assets/icons/audioOFF.png",
             width: this.width * 0.04,
             height: this.width * 0.04,
             opacity: 0.6,
-            position: {h: 50, v: 50}
+            position: {
+                h: 50,
+                v: 50
+            }
         };
 
         let unmuteButton = new RODIN.Element(unmuteParams);
@@ -824,36 +873,49 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             ppm: 1000
         };
 
-        let HDButton = new RODIN.Text(HDParams);
+
+        if (this.HDButton && this.HDButton.parent) {
+            this.panel.remove(this.HDButton);
+            this.HDButton.parent = null;
+            this.HDButton = null;
+            delete this.HDButton;
+        }
+        if (this.SDButton && this.SDButton.parent) {
+            this.panel.remove(this.SDButton);
+            this.SDButton.parent = null;
+            this.SDButton = null;
+            delete this.SDButton;
+        }
+        this.HDButton = new RODIN.Text(HDParams);
 
         this.elementsPending++;
 
-        HDButton.on(RODIN.CONST.READY, (evt) => {
-            HDButton.parent = this.panel;
-            HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        this.HDButton.on(RODIN.CONST.READY, (evt) => {
+            this.HDButton.parent = this.panel;
+            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
             evt.target.animation.add(hoverAnimation, hoverOutAnimation);
             this.elementsPending--;
             this.readyCheck();
         });
 
-        HDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+        this.HDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
             this.hoverAction(evt);
             evt.target.animation.start("hoverAnimation");
         });
 
-        HDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+        this.HDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
             this.hoverOutAction(evt);
             evt.target.animation.start("hoverOutAnimation");
         });
 
-        HDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+        this.HDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
             let playAfter = this.player.isPlaying();
             this.player.switchTo("SD");
 
-            HDButton.parent = null;
-            SDButton.parent = this.panel;
-            SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+            this.HDButton.parent = null;
+            this.SDButton.parent = this.panel;
+            this.SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
 
             if (playAfter) {
                 this.player.play();
@@ -868,38 +930,38 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             fontSize: this.width / 30,
             ppm: 1000
         };
-        let SDButton = new RODIN.Text(SDParams);
+        this.SDButton = new RODIN.Text(SDParams);
 
         this.elementsPending++;
 
-        SDButton.on(RODIN.CONST.READY, (evt) => {
-            SDButton.parent = this.panel;
-            SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        this.SDButton.on(RODIN.CONST.READY, (evt) => {
+            this.SDButton.parent = this.panel;
+            this.SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
             evt.target.animation.add(hoverAnimation, hoverOutAnimation);
             this.elementsPending--;
             this.readyCheck();
-            SDButton.parent = null;
+            this.SDButton.parent = null;
         });
 
-        SDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+        this.SDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
             this.hoverAction(evt);
             evt.target.animation.start("hoverAnimation");
         });
 
-        SDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+        this.SDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
             this.hoverOutAction(evt);
             evt.target.animation.start("hoverOutAnimation");
         });
 
-        SDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+        this.SDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
 
             let playAfter = this.player.isPlaying();
             this.player.switchTo("HD");
 
-            SDButton.parent = null;
-            HDButton.parent = this.panel;
-            HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+            this.SDButton.parent = null;
+            this.HDButton.parent = this.panel;
+            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
 
             if (playAfter) {
                 this.player.play();

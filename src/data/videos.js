@@ -1,4 +1,5 @@
-export const videos = [{
+export const videos = [
+    {
         "title": "Amsterdam Central",
         "description": "The station, which is one of the most visited touristic destinations in the country, is situated literally in the center of Amsterdam.",
         "url": {
